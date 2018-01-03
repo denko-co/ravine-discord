@@ -1,0 +1,274 @@
+{
+   "WRECKAGE":[
+     {
+       "name" : "FLARE GUN",
+       "effect" : ["PROTECT"],
+       "effectDescription" : "Protects whole camp from an animal attack. One use.",
+       "uses" : 1,
+       "wreckage" : true
+     }, {
+       "name" : "BOTTLE OF VODKA",
+       "effect" : ["GAIN 3 SPLIT"],
+       "effectDescription" : "Restores 3 heart(s).",
+       "uses" : 1,
+       "wreckage" : true
+     }, {
+       "name" : "AIRLINE BLANKET",
+       "effect" : ["SHELTER 1"],
+       "effectDescription" : "Protects one player from one weather event. One use.",
+       "uses" : 1,
+       "wreckage" : true
+     }
+   ],
+   "FORAGE":[
+      {
+         "description" : "helpful",
+         "name" : "WOOD",
+         "count" : 8
+      }, {
+        "description" :"useful",
+        "name" : "STONE",
+        "count" : 4
+      }, {
+        "description" :"functional",
+        "name" : "FIBER",
+        "count" : 4
+      }, {
+        "description" :"freshly caught",
+        "name" : "TROUT",
+        "hearts" : 3,
+        "count" : 1
+      }, {
+        "description" :"sweet and sticky",
+        "name" : "HONEYCOMB",
+        "hearts" : 3,
+        "count" : 1
+      }, {
+        "description" :"a midly sweet",
+        "name" : "WILD PLUM",
+        "hearts" : 2,
+        "count" : 2
+      }, {
+        "description" :"delicious and nutritious",
+        "name" : "PINE NUTS",
+        "hearts" : 2,
+        "count" : 2
+      }, {
+        "description" :"a recently deceased",
+        "name" : "SQUIRREL",
+        "hearts" : 2,
+        "count" : 2
+      }, {
+        "description" :"disgusting and nutritious",
+        "name" : "GRUB",
+        "hearts" : 1,
+        "count" : 2
+      }, {
+        "description" :"seemingly edible",
+        "name" : "BERRIES",
+        "hearts" : 1,
+        "count" : 2
+      }, {
+        "description" :"a very bitter",
+        "name" : "DANDELION",
+        "hearts" : 1,
+        "count" : 2
+      }, {
+        "description" :"bland and starchy",
+        "name" : "WILD PARSNIP",
+        "hearts" : 1,
+        "count" : 2
+      }, {
+        "description" :"cute little psychotropic",
+        "name" : "MUSHROOMS",
+        "effect" : ["MADNESS"],
+        "effectDescription" : "Draw a madness card and follow the instructions.",
+        "count" : 1
+      }, {
+        "description" :"a paralysis inducing",
+        "name" : "MUSHROOM",
+        "effect" : ["PARALYSIS"],
+        "effectDescription" : "You are unable to perform any actions until the next day.",
+        "recovery" : ["NEXT"],
+        "count" : 1
+      }, {
+        "description" :"a violent",
+        "name" : "MOOSE",
+        "effect" : ["LOSE 2"],
+        "effectDescription" : "Lose 2 Hearts.",
+        "blockable" : true,
+        "count" : 1
+      }
+   ],
+   "NIGHT":[
+     {
+       "name" : "THE RACCOONS",
+       "description" : "You awake to feel tiny rodent hands rummaging angrily through your pockets.",
+       "effect" : ["LOSE 1"],
+       "effectDescription" : "Give up one food card or lose one heart. Fire cancels this event.",
+       "blockedBy" : [["FIRE", "CANCEL"], ["SACRIFICE FOOD", "CANCEL"]]
+     }, {
+       "name" : "LIGHT RAIN",
+       "description" : "Damp is the new dry.",
+       "effect": ["LOSE 1", "NO FIRE"],
+       "effectDescription" : "Unsheltered players lose one heart. No fire tomorrow.",
+       "blockedBy" : [["SHELTER", "CANCEL"]]
+     }, {
+       "name" : "RAIN",
+       "description" : "Damp, cold and starving.",
+       "effect": ["LOSE 1", "NO FIRE"],
+       "effectDescription" : "Unsheltered players lose one heart. No fire tomorrow.",
+       "blockedBy" : [["SHELTER", "CANCEL"]]
+     }, {
+       "name" : "THE TERROR",
+       "description" : "Between your nightmares and the screams of others, nobody is getting much rest tonight.",
+       "effect": ["LOSE 1"],
+       "effectDescription" : "All players lose one heart. Fire cancels this event.",
+       "blockedBy" : [["FIRE", "CANCEL"]]
+     }, {
+       "name" : "THE BATS",
+       "description" : "A cloud of bloodthirsty creatures comes swarming through the camp.",
+       "effect": ["LOSE 1"],
+       "effectDescription" : "All players lose one heart. Fire cancels this event.",
+       "blockedBy" : [["FIRE", "CANCEL"], ["PROTECT", "CANCEL"]]
+     }, {
+       "name" : "THE BUGS",
+       "description" : "They're out for blood.",
+       "effect": ["LOSE 1"],
+       "effectDescription" : "All players lose one heart. Fire cancels this event.",
+       "blockedBy" : [["FIRE", "CANCEL"], ["PROTECT", "CANCEL"]]
+     }, {
+       "name" : "THE BEAR",
+       "description" : "Starved for food, a huge bear wanders into your camp hoping to find a fresh meal. And it does.",
+       "effect": ["LOSE SHELTER", "LOSE 2"],
+       "effectDescription" : "All players lose two hearts. Any shelter is destroyed.",
+       "blockedBy" : [["PROTECT", "CANCEL"]]
+     }, {
+       "name" : "THE FLOOD",
+       "description" : "Distant rainstorms send their waters roaring through the camp.",
+       "effect": ["LOSE FORAGE ALL", "LOSE SHELTER", "NO FIRE"],
+       "effectDescription" : "All collected forage cards are lost. Any shelter is destroyed. No fire tomorrow.",
+       "blockedBy" : []
+     }, {
+       "name" : "THE WOLVES",
+       "description" : "They came to welcome you to the neighborhood, but they're not leaving without dinner.",
+       "effect": ["LOSE 2"],
+       "effectDescription" : "All players lose two hearts. Fire reduces effect by one.",
+       "blockedBy" : [["PROTECT", "CANCEL"], ["FIRE", "LOSE 1"]]
+     }, {
+       "name" : "THE SCORE",
+       "description" : "You stumble upon a mangled beverage cart from the crash, and it's full of tiny alcohol bottles.",
+       "effect": ["GAIN 1"],
+       "effectDescription" : "All players recover one heart. Fire boosts this effect by one.",
+       "blockedBy" : [["FIRE", "GAIN 2"]]
+     }, {
+       "name" : "THE FOG",
+       "description" : "A blanket of thick, misty gloom envelops the camp. But at least it's a blanket right?",
+       "effect": [],
+       "effectDescription" : "No repercussions tonight.",
+       "blockedBy" : []
+     }, {
+       "name" : "THE QUIET",
+       "description" : "You stare into the darkness, but tonight, nothing stares back. It is quiet, and in a way, beautiful.",
+       "effect": [],
+       "effectDescription" : "No repercussions tonight.",
+       "blockedBy" : []
+     }, {
+       "name" : "THE BIRDS",
+       "description" : "Your supplies are going missing, and large, black feathers are found in their place.",
+       "effect": ["LOSE FORAGE 1"],
+       "effectDescription" : "All players lose one forage card.",
+       "blockedBy" : [["PROTECT", "CANCEL"]]
+     }
+   ],
+   "MADNESS":[
+     {
+       "name" : "CALL ME CAPTAIN",
+       "description" : "One night, you mysteriously vanish into the woods. You return the next morning, but you seem... different.",
+       "effect" : [],
+       "effectDescription" : "Announce that your name is Captain Cranberries. Refuse to speak unless you are addressed as such.",
+       "recovery" : []
+     }, {
+       "name" : "BLIND RAGE",
+       "description" : "They say love is blind, but so is madness. Blinding, at least.",
+       "effect" : ["LOSE DRAW 1"],
+       "effectDescription" : "Foraging now gives one less card.",
+       "recovery" : ["GAIN 1"]
+     }, {
+       "name" : "THE HUNGER",
+       "description" : "Donner, party of one? Your table is ready.",
+       "effect" : ["STEAL 1"],
+       "effectDescription" : "Steal one heart from another player (mention them) and add it to your own.",
+       "recovery" : ["IMMEDIATE"],
+       "blockedBy" : [["PROTECT", "LOSE 1"]]
+     }, {
+       "name" : "SONGBIRD",
+       "description" : "We never knew what a beautiful singing voice you had.",
+       "effect" : [],
+       "effectDescription" : "Everything you say must be a song lyric or title.",
+       "recovery" : ["GAIN 1"]
+     }, {
+       "name" : "THROWING FITS",
+       "description" : "You can't help but think you'd feel a lot better if you could just throw something violently across the campsite.",
+       "effect" : ["LOSE RANDOM"],
+       "effectDescription" : "You violently throw all your cards. Here's what you keep.",
+       "recovery" : ["IMMEDIATE"]
+     }, {
+       "name" : "SILENT TREATMENT",
+       "description" : "You've run out of things to say.",
+       "effect" : ["SPEAK LOSE 1"],
+       "effectDescription" : "You cannot speak. Any time you speak, you lose 1 heart.",
+       "recovery" : []
+     }, {
+       "name" : "SHOWDOWN",
+       "description" : "You may have lost your grip on reality, but you've got a pretty firm grip on the person next to you.",
+       "effect" : ["DUEL LOSE 1"],
+       "effectDescription" : "Choose another player (mention them). The player with the least hearts loses one. If it's a draw, you BOTH lose one.",
+       "recovery" : ["IMMEDIATE"],
+       "blockedBy" : [["PROTECT", "LOSE 1"]]
+     }, {
+       "name" : "THE FINAL HUNT",
+       "description" : "You're going to find food, even if it kills you.",
+       "effect" : ["MUST FEED"],
+       "effectDescription" : "Draw one forage card. If it isn't a food card, lose one heart.",
+       "recovery" : ["IMMEDIATE"]
+     }
+   ],
+   "CRAFT":[
+     {
+       "name" : "BASKET",
+       "description" : "A basket, woven from plant fibers and sticks.",
+       "effect" : ["DRAW 1"],
+       "effectDescription" : "When foraging, draw one additional card. Can be used by one player, once per day.",
+       "count" : 3,
+       "uses" : -1,
+       "recipe" : {
+         "WOOD" : 1,
+         "FIBER" : 2
+       }
+     }, {
+       "name" : "SPEAR",
+       "description" : "A rough hewn wooden spear. Flimsy, but sharp.",
+       "effect" : ["PROTECT 1"],
+       "effectDescription" : "Fends off one attack (animal or human). Breaks after one use.",
+       "count" : 3,
+       "uses" : 1,
+       "recipe" : {
+         "WOOD" : 1,
+         "STONE" : 1
+       }
+     }, {
+       "name" : "SHELTER",
+       "description" : "A rugged shelter, created from mud, fiber, wood, and rocks.",
+       "effect" : ["SHELTER"],
+       "effectDescription" : "Protects up to three players. Lasts indefintely, unless destroyed.",
+       "count" : 1,
+       "uses" : -1,
+       "recipe" : {
+         "WOOD" : 2,
+         "FIBER" : 2,
+         "STONE" : 2
+       }
+     }
+   ]
+}
