@@ -1,0 +1,16 @@
+{
+  "name": "ravine-discord",
+  "version": "0.1.0",
+  "description": "Like Print and Play Ravine, but ON THE LINE.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Frano Stanisic",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^11.1.0",
+    "express": "^4.15.3",
+    "underscore": "^1.8.3"
+  }
+}
