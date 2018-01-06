@@ -211,13 +211,13 @@
        "name" : "THROWING FITS",
        "description" : "You can't help but think you'd feel a lot better if you could just throw something violently across the campsite.",
        "effect" : ["LOSE RANDOM"],
-       "effectDescription" : "You violently throw all your cards. Here's what you keep.",
+       "effectDescription" : "You violently throw all your cards. Check `!me` for the damage. Do you feel any better? ;P",
        "recovery" : ["IMMEDIATE"]
      }, {
        "name" : "SILENT TREATMENT",
        "description" : "You've run out of things to say.",
        "effect" : ["SPEAK LOSE 1"],
-       "effectDescription" : "You cannot speak. Any time you speak, you lose 1 heart.",
+       "effectDescription" : "You cannot speak. Any time you speak (type anything that's not a command), you lose 1 heart.",
        "recovery" : []
      }, {
        "name" : "SHOWDOWN",
@@ -230,7 +230,7 @@
        "name" : "THE FINAL HUNT",
        "description" : "You're going to find food, even if it kills you.",
        "effect" : ["MUST FEED"],
-       "effectDescription" : "Draw one forage card. If it isn't a food card, lose one heart.",
+       "effectDescription" : "Draw one forage card. If it isn't a food card, you die.",
        "recovery" : ["IMMEDIATE"]
      }
    ],
@@ -268,6 +268,16 @@
          "WOOD" : 2,
          "FIBER" : 2,
          "STONE" : 2
+       }
+     }, {
+       "name" : "FIRE",
+       "description" : "Warmth, protection, and comfort.",
+       "effect" : ["FIRE"],
+       "effectDescription" : "Repels animals and provides warmth and comfort. Lasts 1 night.",
+       "count" : 1,
+       "uses" : 1,
+       "recipe" : {
+         "WOOD" : 1
        }
      }
    ]

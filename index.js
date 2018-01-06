@@ -21,7 +21,6 @@ bot.on('message', function (message) {
       var command = message.content.match(/\S+/g) || [];
       var thisGame = listeningTo[channelID];
       var player = thisGame.players[message.author.id.toString()];
-      // console.log(player); // DELET THIS
       if (message.content === '!help') {
         // Send the player some instructions, regardless of current game state
       } else {
@@ -44,7 +43,7 @@ bot.on('message', function (message) {
                   playerToGive.gear.push(thisGame.wreckage.pop());
                 }
                 thisGame.state = 'day';
-
+                // console.log(thisGame);
                 message.channel.send(tr.realStart).then(function (message) {
                   message.channel.send(printDayStart(thisGame) + tr.needHelp);
                 });
@@ -64,7 +63,11 @@ bot.on('message', function (message) {
                     maxHearts: 6,
                     forage: 0,
                     currentForage: 0,
-                    craft: [],
+                    craftSupplies: {
+                      'WOOD': 0,
+                      'STONE': 0,
+                      'FIBER': 0
+                    },
                     madness: [],
                     cardInFocus: null,
                     goingMad: false,
@@ -74,7 +77,6 @@ bot.on('message', function (message) {
 
                   // THIS IS FOR TESTING, PLEASE DELETE THIS FRANO
                   thisGame.players[message.author.id.toString()].gear.push(_.clone(cards.CRAFT)[1]);
-                  console.log(thisGame.players[message.author.id.toString()]);
                   message.channel.send(tr.welcome);
                 }
                 break;
@@ -144,6 +146,51 @@ bot.on('message', function (message) {
               case '!give':
                 if (thisGame.waiting) {
                   message.channel.send(tr.inProgress);
+                } else {
+                  if (command[1] && command[2]) {
+                    var personsCode = command[2].match(/^<@\d*>$/g);
+                    var persons;
+                    if (personsCode) {
+                      persons = personsCode.toString().slice(2, -1);
+                      if (thisGame.players[persons] && message.author.id.toString() !== persons) {
+                        if (thisGame.players[persons].hearts <= 0) {
+                          message.channel.send(tr.baddestGive);
+                          return;
+                        }
+                      } else {
+                        message.channel.send(tr.badderGive);
+                        return;
+                      }
+                    } else {
+                      message.channel.send(tr.badGive);
+                      return;
+                    }
+                    var item = parseInt(command[1]);
+                    if (item && player.gear[item - 1]) {
+                      thisGame.players[persons].gear.push(player.gear[item - 1]);
+                      player.gear.splice(item - 1, 1);
+                      message.channel.send(tr.tC);
+                    } else if (_.contains(['WOOD', 'STONE', 'FIBER'], command[1])) {
+                      var numToGive = parseInt(command[3]);
+                      if (numToGive || numToGive === 0) {
+                        if (numToGive <= 0) {
+                          message.channel.send(tr.numberGive);
+                        } else if (numToGive > player.craftSupplies[command[1]]) {
+                          message.channel.send(tr.baddingGive);
+                        } else {
+                          thisGame.players[persons].craftSupplies[command[1]] += numToGive;
+                          player.craftSupplies[command[1]] -= numToGive;
+                          message.channel.send(tr.tC);
+                        }
+                      } else {
+                        message.channel.send(tr.badGive);
+                      }
+                    } else {
+                      message.channel.send(tr.badGive);
+                    }
+                  } else {
+                    message.channel.send(tr.badGive);
+                  }
                 }
                 break;
               case '!use':
@@ -163,7 +210,7 @@ bot.on('message', function (message) {
                           var isFood = false;
                           for (var i = 0; i < itemDanger.effect.length; i++) {
                             if (itemDanger.effect[i].startsWith('PROTECT')) {
-                              player.gear = player.gear.splice(itemIdDanger - 2, 1);
+                              player.gear.splice(itemIdDanger - 1, 1);
                               if (thisGame.players[thisGame.playersInFocus[0]].goingMad) {
                                 if (thisGame.haveForaged) {
                                   // Night madness, handle it!
@@ -198,7 +245,132 @@ bot.on('message', function (message) {
                   if (command[1]) {
                     var itemIdSafe = parseInt(command[1]);
                     if (itemIdSafe && player.gear[itemIdSafe - 1]) {
-                      console.log('Need to implement this!');
+                      var itemSafe = player.gear[itemIdSafe - 1];
+                      var isFoodSafe = itemSafe.hearts;
+                      var isProtectSafe = false;
+                      if (!isFoodSafe) {
+                        for (var j = 0; j < itemSafe.effect.length; j++) {
+                          if (itemSafe.effect[j].startsWith('PROTECT')) {
+                            isProtectSafe = true;
+                          } else if (itemSafe.effect[j].startsWith('GAIN')) {
+                            isFoodSafe = parseInt(itemSafe.effect[j].split(' ')[1]);
+                          }
+                        }
+                      }
+                      if (isFoodSafe) {
+                        var peopleToFeed = command.length - 2;
+                        if (peopleToFeed === 0) {
+                          // Eat it all, yay!
+                          if (player.maxHearts === player.hearts) {
+                            message.channel.send(tr.dumbEat);
+                          } else {
+                            var valueToHeal = Math.min((player.maxHearts - player.hearts), isFoodSafe);
+                            player.hearts += valueToHeal;
+                            var msg2Send = tr.drawFood + ' <@' + message.author.id.toString() + '> ' + tr.h4 + valueToHeal + ' heart(s)';
+                            if (player.maxHearts === player.hearts) {
+                              msg2Send += tr.maxHP;
+                            } else {
+                              msg2Send += '.';
+                            }
+                            for (var singleMadness = player.madness.length - 1; singleMadness >= 0; singleMadness--) {
+                              var singleMadnessCard = player.madness[singleMadness];
+                              for (var singleMadnessRecov = 0; singleMadnessRecov < singleMadnessCard.recovery.length; singleMadnessRecov++) {
+                                if (singleMadnessCard.recovery[singleMadnessRecov] === 'GAIN 1') {
+                                  msg2Send += ' **' + singleMadnessCard.name + '** has been cured!';
+                                  player.madness.splice(singleMadness, 1);
+                                  break;
+                                }
+                              }
+                            }
+                            message.channel.send(msg2Send);
+                            player.gear.splice(itemIdSafe - 1, 1);
+                          }
+                        } else if (peopleToFeed % 2 === 1) {
+                          message.channel.send(tr.badEat);
+                        } else {
+                          var eatingPeople = [];
+                          var foodCount = 0;
+                          var hasMax = true;
+                          for (var k = 2; k < command.length; k += 2) {
+                            var personCode = command[k].match(/^<@\d*>$/g);
+                            var person;
+                            if (personCode) {
+                              person = personCode.toString().slice(2, -1);
+                            } else {
+                              message.channel.send(tr.badEat);
+                              return;
+                            }
+                            if (thisGame.players[person]) {
+                              if (thisGame.players[person].hearts <= 0) {
+                                message.channel.send(tr.baddestEat);
+                                return;
+                              }
+                              var toEat = parseInt(command[k + 1]);
+                              if (toEat) {
+                                if (toEat > 0) {
+                                  // All good!
+                                  if (thisGame.players[person].hearts !== thisGame.players[person].maxHearts) {
+                                    hasMax = false;
+                                  }
+                                  foodCount += toEat;
+                                  eatingPeople.push({
+                                    'person': person,
+                                    'toEat': toEat
+                                  });
+                                } else {
+                                  message.channel.send(tr.numberEat);
+                                  return;
+                                }
+                              } else {
+                                message.channel.send(tr.badEat);
+                                return;
+                              }
+                            } else {
+                              message.channel.send(tr.badderEat);
+                              return;
+                            }
+                          }
+                          if (hasMax) {
+                            message.channel.send(tr.dumbEat);
+                          } else if (foodCount !== isFoodSafe) {
+                            if (foodCount > isFoodSafe) {
+                              message.channel.send(tr.baddingEat);
+                            } else {
+                              message.channel.send(tr.paaf);
+                            }
+                          } else {
+                            // Eat! Nom nom nom!
+                            var msg2SendGroup = '';
+                            for (var r = 0; r < eatingPeople.length; r++) {
+                              var eating = thisGame.players[eatingPeople[r].person];
+                              var valueToEat = Math.min((eating.maxHearts - eating.hearts), eatingPeople[r].toEat);
+                              eating.hearts += valueToEat;
+                              msg2SendGroup += '\n' + tr.drawFood + ' <@' + eatingPeople[r].person + '> ' + tr.h4 + valueToEat + ' heart(s)';
+                              if (eating.maxHearts === eating.hearts) {
+                                msg2SendGroup += tr.maxHP;
+                              } else {
+                                msg2SendGroup += '.';
+                              }
+                              for (var groupMadness = eating.madness.length - 1; groupMadness >= 0; groupMadness--) {
+                                var groupMadnessCard = eating.madness[groupMadness];
+                                for (var groupMadnessRecov = 0; groupMadnessRecov < groupMadnessCard.recovery.length; groupMadnessRecov++) {
+                                  if (groupMadnessCard.recovery[groupMadnessRecov] === 'GAIN 1') {
+                                    msg2SendGroup += ' **' + groupMadnessCard.name + '** has been cured!';
+                                    eating.madness.splice(groupMadness, 1);
+                                    break;
+                                  }
+                                }
+                              }
+                            }
+                            message.channel.send(msg2SendGroup);
+                            player.gear.splice(itemIdSafe - 1, 1);
+                          }
+                        }
+                      } else if (isProtectSafe) {
+                        message.channel.send(tr.cantProtect);
+                      } else {
+                        message.channel.send(tr.cantShelter);
+                      }
                     } else {
                       message.channel.send(tr.mustUse);
                     }
@@ -232,6 +404,11 @@ bot.on('message', function (message) {
                 }
                 break;
               default:
+                if (_.contains(_.pluck(player.madness, 'name'), 'SILENT TREATMENT')) { // Should do this off madness effects
+                  message.channel.send(tr.silent);
+                  player.hearts--;
+                  return;
+                }
                 if (player.goingMad && !(player.targeting)) {
                   // Mad person typed something
                   var res = message.content.match(/^<@\d*>$/g);
@@ -288,7 +465,7 @@ bot.on('message', function (message) {
       var realForage = [];
       for (var f in _.keys(forage)) {
         var cardToDupe = forage[f];
-        for (var j = 0; j < cardToDupe.count; j++) {
+        for (var z = 0; z < cardToDupe.count; z++) {
           var dupeCard = _.clone(cardToDupe);
           delete dupeCard['count'];
           realForage.push(dupeCard);
@@ -320,28 +497,24 @@ function printPlayer (player, usernaem) {
   }
 
   message += '\n\n__Hearts: __' + player.hearts + '\n\n__Madness: __';
-  if (player.madness.length === 0) {
+  if (player.goingMad) {
+    message += 'You\'re currently going mad (see above)';
+  }
+  if (player.madness.length === 0 && !player.goingMad) {
     message += 'You\'re sane! (at least, in game)';
   } else {
     for (var j = 0; j < player.madness.length; j++) {
-      message += printMadness(player.madness[j]);
+      message += '\n' + printMadness(player.madness[j]);
     }
   }
 
-  var craftStuff = {
-    'WOOD': 0,
-    'STONE': 0,
-    'FIBER': 0
-  };
-  for (var k = 0; k < player.craft.length; k++) {
-    craftStuff[player.craft.name] += 1;
-  }
-  message += '\n\n__Craft: __\nWOOD: ' + craftStuff.WOOD + '\nSTONE: ' + craftStuff.STONE + '\nFIBER: ' + craftStuff.FIBER;
-
+  message += '\n\n__Craft: __\nWOOD: ' + player.craftSupplies.WOOD + '\nSTONE: ' + player.craftSupplies.STONE + '\nFIBER: ' + player.craftSupplies.FIBER;
+  console.log(player);
   return message;
 }
 
 function handleForage (thisGame, message, choice) {
+  var alter = 0;
   var player = thisGame.players[thisGame.playersInFocus[0]];
   if (typeof choice !== 'undefined') {
     if (player.targeting) {
@@ -354,11 +527,28 @@ function handleForage (thisGame, message, choice) {
     player.cardInFocus = null;
     thisGame.waiting = false;
     player.currentForage--;
+  } else {
+    if (player.forage !== 0) {
+      // Handle 'alter'
+      if (_.contains(_.pluck(player.madness, 'name'), 'BLIND RAGE')) { // Should do this off madness effects
+        alter -= 1;
+        message.channel.send(tr.blind);
+      }
+      if (_.contains(_.pluck(player.gear, 'name'), 'BASKET')) { // This too!
+        alter += 1;
+        message.channel.send(tr.basket);
+      }
+      player.currentForage += alter;
+    }
   }
   while (player) {
-    if (player.currentForage === 0) {
+    if (player.currentForage <= 0) {
       if (typeof choice === 'undefined') {
-        message.channel.send('<@' + thisGame.playersInFocus[0] + '> is taking a well deserved rest.');
+        if (alter === 0) {
+          message.channel.send('<@' + thisGame.playersInFocus[0] + '> is taking a well deserved rest.');
+        } else {
+          message.channel.send('<@' + thisGame.playersInFocus[0] + '> finds nothing! Wow!');
+        }
       }
     } else {
       message.channel.send('<@' + thisGame.playersInFocus[0] + '> is foraging!');
@@ -377,7 +567,7 @@ function handleForage (thisGame, message, choice) {
           if (card.hearts) {
             player.gear.push(card);
           } else {
-            player.craft.push(card);
+            player.craftSupplies[card.name] += 1;
           }
         }
         player.cardInFocus = null;
@@ -452,14 +642,62 @@ function handleMadness (player, thisGame, message, choice) {
     message.channel.send(printMadness(madness));
   }
   switch (madness.effect[0]) {
+    case 'MUST FEED':
+      var card = thisGame.forage.pop();
+      message.channel.send('You found ' + printForage(card));
+      if (card.hearts) {
+        player.gear.push(card);
+        message.channel.send(tr.drawFood);
+      } else {
+        player.hearts -= 9001;
+        message.channel.send('<@' + thisGame.playersInFocus[0] + '> ' + tr.loses9001);
+      }
+      break;
+    case 'LOSE RANDOM':
+      var flip = 0;
+      for (var i = player.gear.length - 1; i >= 0; i--) {
+        flip = _.random(1);
+        if (flip) {
+          player.gear.splice(i, 1);
+        }
+      }
+      var supplies = _.keys(player.craftSupplies);
+      for (var j = 0; j < supplies.length; j++) {
+        var toKeep = 0;
+        for (var keeps = 0; j < player.craftSupplies[supplies[j]]; keeps++) {
+          toKeep += _.random(1);
+        }
+        player.craftSupplies[supplies[j]] = toKeep;
+      }
+      break;
+    case 'STEAL 1':
     case 'DUEL LOSE 1':
       if (typeof choice !== 'undefined') {
         if (choice) {
           // Hit deflected! Ow!
           player.hearts--;
+          message.channel.send('<@' + thisGame.playersInFocus[0] + '> ' + tr.getSmacked);
         } else {
-          // Other person hit
-          thisGame.players[player.targeting].hearts--;
+          if (madness.effect[0] === 'STEAL 1') {
+            if (player.hearts !== player.maxHearts) {
+              player.hearts++;
+              message.channel.send('<@' + thisGame.playersInFocus[0] + '> ' + tr.reverseSmacked);
+            } else {
+              message.channel.send('Sorry <@' + thisGame.playersInFocus[0] + '>, ' + tr.noHeal + '(' + player.maxHearts + ')');
+            }
+            thisGame.players[player.targeting].hearts--;
+            message.channel.send('<@' + player.targeting + '> ' + tr.getSmacked);
+          } else {
+            // Other person hit, do the maths
+            if (player.hearts >= thisGame.players[player.targeting].hearts) {
+              thisGame.players[player.targeting].hearts--;
+              message.channel.send('<@' + player.targeting + '> ' + tr.getSmacked);
+            }
+            if (player.hearts <= thisGame.players[player.targeting].hearts) {
+              player.hearts--;
+              message.channel.send('<@' + thisGame.playersInFocus[0] + '> ' + tr.getSmacked);
+            }
+          }
         }
         thisGame.players[player.targeting].targeted = false;
         player.targeting = null;
@@ -475,13 +713,13 @@ function handleMadness (player, thisGame, message, choice) {
 }
 
 function printMadness (madness) {
-  var recovery = '';
-  if (madness.recovery === []) {
-    recovery = '\n\nThere in no known cure.';
-  } else if (recovery[0] === 'NEXT') {
-    recovery = '\n\nYou will automatically recover tomorrow.';
-  } else if (recovery[0] !== 'IMMEDIATE') {
-    recovery = '\n\nGain 1 heart to cure.'; // LAZY!
+  var recovery = '\n';
+  if (madness.recovery.length === 0) {
+    recovery = '\n\nThere in no known cure.\n';
+  } else if (madness.recovery[0] === 'NEXT') {
+    recovery = '\n\nYou will automatically recover tomorrow.\n';
+  } else if (madness.recovery[0] !== 'IMMEDIATE') {
+    recovery = '\n\nGain 1 heart to cure.\n'; // LAZY!
   }
   return '/*\nYou\'ve been afflicted by **"' + madness.name + '"** *(' + madness.description + ')*\n\n' + madness.effectDescription + recovery + '*/';
 }
