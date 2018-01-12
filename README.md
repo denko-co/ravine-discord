@@ -9,5 +9,3 @@ Ravine to-do:
 * Handle morning madness
 * Cover death / win game cases
 * Write the code for paralysis :P
-
-There is a note here about single madness but I don't know what it's for, uh oh!
