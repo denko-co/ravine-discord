@@ -64,5 +64,12 @@
   "haveFire" : "Thankfully, you have one! Event cancelled!",
   "gainHeartsAll" : " heart(s) for everyone! (alive)",
   "nightUseWrong" : "This item does not match the current defend type required.",
-  "isBug" : "You should never see this. Please contact my owner!"
+  "isBug" : "You should never see this. Please contact my owner!",
+  "lS" : " loses their shelter!",
+  "lF" : " loses their forage cards!",
+  "laF" : " loses a forage card!",
+  "kF" : " doesn't have any forage cards! Wow! Well played!",
+  "noTargets" : "I've got good news and bad news. The bad news is, you're the only person alive. The good news is, that means this has no effect!",
+  "urDed" : " has died! Their loot has been put in the `!pile`.",
+  "nightMad" : " has gone mad in the night. Hold tight."
 }
