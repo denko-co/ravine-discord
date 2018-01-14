@@ -5,19 +5,19 @@
        "effect" : ["PROTECT"],
        "effectDescription" : "Protects whole camp from an animal attack. One use.",
        "uses" : 1,
-       "wreckage" : true
+       "nonForage" : true
      }, {
        "name" : "BOTTLE OF VODKA",
        "effect" : ["GAIN 3 SPLIT"],
        "effectDescription" : "Restores 3 heart(s).",
        "uses" : 1,
-       "wreckage" : true
+       "nonForage" : true
      }, {
        "name" : "AIRLINE BLANKET",
        "effect" : ["SHELTER 1"],
        "effectDescription" : "Protects one player from one weather event. One use.",
        "uses" : 1,
-       "wreckage" : true
+       "nonForage" : true
      }
    ],
    "FORAGE":[
@@ -85,11 +85,10 @@
         "effectDescription" : "Draw a madness card and follow the instructions.",
         "count" : 1
       }, {
-        "description" :"a paralysis inducing",
+        "description" :"a ludicrously poisonous",
         "name" : "MUSHROOM",
-        "effect" : ["PARALYSIS"],
-        "effectDescription" : "You are unable to perform any actions until the next day.",
-        "recovery" : ["NEXT"],
+        "effect" : ["SET 1"],
+        "effectDescription" : "Lose all but one of your hearts.",
         "count" : 1
       }, {
         "description" :"a violent",
@@ -106,7 +105,7 @@
        "description" : "You awake to feel tiny rodent hands rummaging angrily through your pockets.",
        "effect" : ["LOSE 1"],
        "effectDescription" : "Give up one food card or lose one heart. Fire cancels this event.",
-       "blockedBy" : [["FIRE", "CANCEL"], ["SACRIFICE FOOD", "CANCEL"]]
+       "blockedBy" : [["FIRE", "CANCEL"], ["SACRIFICE FOOD", "CANCEL"], ["PROTECT", "CANCEL"]]
      }, {
        "name" : "LIGHT RAIN",
        "description" : "Damp is the new dry.",
@@ -177,7 +176,7 @@
        "name" : "THE BIRDS",
        "description" : "Your supplies are going missing, and large, black feathers are found in their place.",
        "effect": ["LOSE FORAGE 1"],
-       "effectDescription" : "All players lose one forage card.",
+       "effectDescription" : "All players lose one random forage card.",
        "blockedBy" : [["PROTECT", "CANCEL"]]
      }
    ],
@@ -240,45 +239,45 @@
        "description" : "A basket, woven from plant fibers and sticks.",
        "effect" : ["DRAW 1"],
        "effectDescription" : "When foraging, draw one additional card. Can be used by one player, once per day.",
-       "count" : 3,
        "uses" : -1,
        "recipe" : {
          "WOOD" : 1,
          "FIBER" : 2
-       }
+       },
+       "nonForage" : true
      }, {
        "name" : "SPEAR",
        "description" : "A rough hewn wooden spear. Flimsy, but sharp.",
        "effect" : ["PROTECT 1"],
        "effectDescription" : "Fends off one attack (animal or human). Breaks after one use.",
-       "count" : 3,
        "uses" : 1,
        "recipe" : {
          "WOOD" : 1,
          "STONE" : 1
-       }
+       },
+       "nonForage" : true
      }, {
        "name" : "SHELTER",
        "description" : "A rugged shelter, created from mud, fiber, wood, and rocks.",
        "effect" : ["SHELTER"],
        "effectDescription" : "Protects up to three players. Lasts indefintely, unless destroyed.",
-       "count" : 1,
        "uses" : -1,
        "recipe" : {
          "WOOD" : 2,
          "FIBER" : 2,
          "STONE" : 2
-       }
+       },
+       "nonForage" : true
      }, {
        "name" : "FIRE",
        "description" : "Warmth, protection, and comfort.",
        "effect" : ["FIRE"],
        "effectDescription" : "Repels animals and provides warmth and comfort. Lasts 1 night.",
-       "count" : 1,
        "uses" : 1,
        "recipe" : {
          "WOOD" : 1
-       }
+       },
+       "nonForage" : true
      }
    ]
 }
