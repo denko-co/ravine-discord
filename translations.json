@@ -73,6 +73,7 @@
   "lF" : " loses their forage cards!",
   "laF" : " loses a forage card!",
   "kF" : " doesn't have any forage cards! Wow! Well played!",
+  "nF" : "You hear a moose far off in the distance.",
   "noTargets" : "I've got good news and bad news. The bad news is, you're the only person alive. The good news is, that means this has no effect!",
   "urDed" : " has died! Their loot has been put in the `!pile`.",
   "pileInstructions" : "This is where dead player's loot goes. To take from here, type `!pile <item number>` for gear, or `!pile <craft item> <number>` for craft supplies.",

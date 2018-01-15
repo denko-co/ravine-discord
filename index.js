@@ -620,6 +620,11 @@ function setupGame () {
       }
     }
   };
+  gameState.forage = _.shuffle(createForage());
+  return gameState;
+}
+
+function createForage () {
   var forage = _.clone(cards.FORAGE);
   var realForage = [];
   for (var f in _.keys(forage)) {
@@ -630,8 +635,7 @@ function setupGame () {
       realForage.push(dupeCard);
     }
   }
-  gameState.forage = _.shuffle(realForage);
-  return gameState;
+  return _.shuffle(realForage);
 }
 
 function printGame (thisGame) {
@@ -647,12 +651,12 @@ function printGame (thisGame) {
 
 function checkAndSetCraft (mySupplies, recipeCost) {
   var leftOver = {
-    WOOD: 0,
-    STONE: 0,
-    FIBER: 0
+    WOOD: mySupplies.WOOD,
+    STONE: mySupplies.STONE,
+    FIBER: mySupplies.FIBER
   };
   for (var supp in recipeCost) {
-    leftOver[supp] = mySupplies[supp] - recipeCost[supp];
+    leftOver[supp] = leftOver[supp] - recipeCost[supp];
     if (leftOver[supp] < 0) {
       return false;
     }
@@ -1050,6 +1054,12 @@ function handleForage (thisGame, message, choice) {
       message.channel.send('<@' + thisGame.playersInFocus[0] + '> is foraging!');
       while (player.currentForage > 0) {
         var card = thisGame.forage.pop();
+        if (!card) {
+          // Reshuffle forage cards into the deck
+          message.channel.send(tr.nF);
+          thisGame.forage = _.shuffle(createForage());
+          card = thisGame.forage.pop();
+        }
         player.cardInFocus = card;
         message.channel.send('You found ' + printForage(card));
         if (card.effect) {
@@ -1176,6 +1186,12 @@ function handleMadness (player, thisGame, message, choice) {
   switch (madness.effect[0]) {
     case 'MUST FEED':
       var card = thisGame.forage.pop();
+      if (!card) {
+        // Reshuffle forage cards into the deck
+        message.channel.send(tr.nF);
+        thisGame.forage = _.shuffle(createForage());
+        card = thisGame.forage.pop();
+      }
       message.channel.send('You found ' + printForage(card));
       if (card.hearts) {
         player.gear.push(card);
