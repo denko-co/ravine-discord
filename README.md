@@ -5,7 +5,5 @@ This is parked until I fix the DMC Discord 404 issue (although it shouldn't caus
 EDIT: Now that Saren has brought in changes need to also bring those in (test SPDs), might be a Dee weekend, uh oh!
 
 Ravine to-do:
-* Finish night effects
-* Handle morning madness
-* Cover death / win game cases
-* Write the code for paralysis :P
+* Fix game over handling
+* Build to do list out of feedback
