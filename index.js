@@ -149,7 +149,7 @@ bot.on('message', function (message) {
                   thisGame.isNight = true;
                   message.channel.send(tr.nightStart);
                   thisGame = handleNight(thisGame, message);
-                  if (!thisGame.waiting) {
+                  if (!thisGame.waiting && whosAlive(thisGame).length > 0) {
                     thisGame.playersInFocus = whosAlive(thisGame);
                     thisGame = handleNightMadness(thisGame, message);
                   }
@@ -296,7 +296,7 @@ bot.on('message', function (message) {
                           if (itemDanger.hearts && currentEffect === 'GAIN') {
                             player.gear.splice(itemIdDanger - 1, 1);
                             thisGame = handleNight(thisGame, message, true);
-                            if (!thisGame.waiting) {
+                            if (!thisGame.waiting && whosAlive(thisGame).length > 0) {
                               thisGame.playersInFocus = whosAlive(thisGame);
                               thisGame = handleNightMadness(thisGame, message);
                             }
@@ -308,7 +308,7 @@ bot.on('message', function (message) {
                                 }
                                 var choiceToProvide = (itemDanger.effect[creativeIteratorNameIAmRunningOut] === currentEffect && currentEffect !== 'GAIN') ? 'ALL' : true;
                                 thisGame = handleNight(thisGame, message, choiceToProvide);
-                                if (!thisGame.waiting) {
+                                if (!thisGame.waiting && whosAlive(thisGame).length > 0) {
                                   thisGame.playersInFocus = whosAlive(thisGame);
                                   thisGame = handleNightMadness(thisGame, message);
                                 }
@@ -513,7 +513,7 @@ bot.on('message', function (message) {
                   if (thisGame.playersInFocus[0] === message.author.id.toString()) {
                     if (thisGame.isNight) {
                       thisGame = handleNight(thisGame, message, false);
-                      if (!thisGame.waiting) {
+                      if (!thisGame.waiting && whosAlive(thisGame).length > 0) {
                         thisGame.playersInFocus = whosAlive(thisGame);
                         thisGame = handleNightMadness(thisGame, message);
                       }
@@ -555,26 +555,29 @@ bot.on('message', function (message) {
                     var target = res.toString().slice(2, -1);
                     if (!thisGame.players[target]) {
                       message.channel.send(tr.really);
-                    }
-                    player.targeting = target;
-                    thisGame.players[target].targeted = true;
-                    var defenders = [];
-                    for (var def in thisGame.players) {
-                      if (!thisGame.players[def].goingMad && thisGame.players[def].isAlive) {
-                        defenders.push(thisGame.players[def]);
-                      }
-                    }
-                    if (canDefend(defenders, 'PROTECT')) {
-                      // Send inspirational message
-                      message.channel.send(message.content + tr.canDefendTeam1 + 'PROTECT' + tr.canDefendTeam2 + ' ' + tr.sadAttack);
+                    } else if (target === message.author.id.toString()) {
+                      message.channel.send(tr.notYouPass);
                     } else {
-                      // Nobody can stop this. Sorry.
-                      if (thisGame.isNight) {
-                        // Night madness, handle it!
-                        thisGame = handleNightMadness(thisGame, message, false);
+                      player.targeting = target;
+                      thisGame.players[target].targeted = true;
+                      var defenders = [];
+                      for (var def in thisGame.players) {
+                        if (!thisGame.players[def].goingMad && thisGame.players[def].isAlive) {
+                          defenders.push(thisGame.players[def]);
+                        }
+                      }
+                      if (canDefend(defenders, 'PROTECT')) {
+                        // Send inspirational message
+                        message.channel.send(message.content + tr.canDefendTeam1 + 'PROTECT' + tr.canDefendTeam2 + ' ' + tr.sadAttack);
                       } else {
-                        // Foraging madness! Uh oh!
-                        thisGame = handleForage(thisGame, message, false);
+                        // Nobody can stop this. Sorry.
+                        if (thisGame.isNight) {
+                          // Night madness, handle it!
+                          thisGame = handleNightMadness(thisGame, message, false);
+                        } else {
+                          // Foraging madness! Uh oh!
+                          thisGame = handleForage(thisGame, message, false);
+                        }
                       }
                     }
                   }
@@ -635,7 +638,7 @@ function createForage () {
       realForage.push(dupeCard);
     }
   }
-  return _.shuffle(realForage);
+  return realForage;
 }
 
 function printGame (thisGame) {
@@ -886,7 +889,7 @@ function handleNight (thisGame, message, choice) {
               var currentNumber = 0;
               for (var craftDelete in player.craftSupplies) {
                 currentNumber += player.craftSupplies[craftDelete];
-                if (currentNumber >= randomItem) {
+                if (currentNumber >= randomItem && player.craftSupplies[craftDelete] !== 0) {
                   player.craftSupplies[craftDelete] -= 1;
                   break;
                 }
