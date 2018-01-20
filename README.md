@@ -7,5 +7,6 @@ EDIT: Now that Saren has brought in changes need to also bring those in (test SP
 Ravine to-do:
 * Fix game over handling
 * Build to do list out of feedback
+* Change event cards to future tense
 
 This is a reminder to swap out the mushroom!
