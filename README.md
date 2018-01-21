@@ -5,8 +5,15 @@ This is parked until I fix the DMC Discord 404 issue (although it shouldn't caus
 EDIT: Now that Saren has brought in changes need to also bring those in (test SPDs), might be a Dee weekend next weekend, uh oh!
 
 Ravine to-do:
-* Fix game over handling
-* Build to do list out of feedback
-* Change event cards to future tense
+* Fix game over handling.
+* Change event cards to future tense.
+* Use string matching for all operations.
+* Offer reduced output options for `!me`.
+* Tell the player what they are missing on failed crafts.
+*  Have players react for ready up.
+* Make crafting material more clear.
+* Switch statement for heart(s).
+* Healing should assume full hearts if none specified.
+* Investigate alternatives to `!me`.
 
 This is a reminder to swap out the mushroom!
