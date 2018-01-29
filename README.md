@@ -14,5 +14,5 @@ Ravine to-do:
 * Switch statement for heart(s).
 * Healing should assume full hearts if none specified.
 * Investigate alternatives to `!me`.
-* Do stats!
+* Do stats - add persistence first, probably, then track a leaderboard!
 * Swap mushroom!
