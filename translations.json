@@ -1,5 +1,5 @@
 {
-  "activate" : "I'm so excited!",
+  "activate" : "Let's go!",
   "introduce" : "On behalf of all of us here at Treetop Airlines, welcome to Ravine. For help, type `!help` and one of our staff will assist you. Otherwise, when you're ready, type `!join`.",
   "alreadyJoined" : "You've already joined! Sit back, relax, and enjoy the flight.",
   "sorryFull" : "Sorry, this flight is already fully booked. Come back later!",
