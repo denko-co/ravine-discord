@@ -13,6 +13,30 @@ bot.on('ready', function (event) {
   console.log('Logged in as %s - %s\n', bot.user.username, bot.user.id);
 });
 
+bot.on('messageReactionAdd', function (messageReaction) {
+  var message = messageReaction.message;
+  var channelID = message.channel.id.toString();
+  if (channelID in listeningTo) {
+    var thisGame = listeningTo[channelID];
+    var peopleAlive = whosAlive(thisGame).length;
+    if (message.id === thisGame.readyMessage && whosAlive(thisGame).length !== 0) {
+      var peopleReady = message.reactions.reduce(function (val, curr) { // This could probably use a reaction collector
+        if (curr.emoji.name === '✅') {
+          val += curr.users.filter(function (user) {
+            var player = thisGame.players[user.id];
+            return player && player.isAlive;
+          }).array().length;
+        }
+        return val;
+      }, 0);
+      if (peopleAlive === peopleReady) {
+        thisGame.readyMessage = null;
+        thisGame = handleReady(thisGame, message);
+      }
+    }
+  }
+});
+
 bot.on('message', function (message) {
   if (!message.author.bot && message.content) {
     console.log(message.author.username + ' - ' + message.author.id + ' - ' + message.channel.id + ' - ' + message.content);
@@ -21,7 +45,7 @@ bot.on('message', function (message) {
       var command = message.content.match(/\S+/g) || [];
       var thisGame = listeningTo[channelID];
       var player = thisGame.players[message.author.id.toString()];
-      var commands = [' !help', ' !status', ' !me', ' !forage', ' !ready', ' !craft', ' !give', ' !use', ' !pass', ' !pile'];
+      var commands = [' !help', ' !status', ' !me', ' !forage', ' !craft', ' !give', ' !use', ' !pass', ' !pile'];
       if (whosAlive(thisGame).length === 0 && thisGame.state !== 'joining') {
         // Game is over, we are waiting for a retry
         if (message.content === '!retry') {
@@ -54,7 +78,10 @@ bot.on('message', function (message) {
                 thisGame.state = 'ingame';
                 // console.log(thisGame);
                 message.channel.send(tr.realStart).then(function (message) {
-                  message.channel.send(printDayStart(thisGame) + tr.needHelp);
+                  message.channel.send(printDayStart(thisGame) + tr.needHelp + '. ' + tr.rUReady + tr.tF + tr.react).then(function (startMessage) {
+                    thisGame.readyMessage = startMessage.id;
+                    startMessage.react('✅');
+                  });
                 });
               }
               break;
@@ -132,31 +159,12 @@ bot.on('message', function (message) {
                   var numHearts = parseInt(command[1]);
                   if ((numHearts === 0 || numHearts) && numHearts >= 0 && numHearts <= 3) {
                     player.currentForage = numHearts;
-                    message.channel.send('Foraging for ' + numHearts + ', type `!ready` to begin the hunt!');
+                    message.channel.send('Foraging for ' + numHearts + ', good luck! ;P');
                   } else {
                     message.channel.send(tr.mustForage);
                   }
                 } else {
                   message.channel.send(tr.mustForage);
-                }
-                break;
-              case '!ready':
-                if (thisGame.waiting) {
-                  message.channel.send(tr.inProgress);
-                } else if (thisGame.haveForaged) {
-                  // Night is starting
-                  thisGame.playersInFocus = whosAlive(thisGame);
-                  thisGame.isNight = true;
-                  message.channel.send(tr.nightStart);
-                  thisGame = handleNight(thisGame, message);
-                  if (!thisGame.waiting && whosAlive(thisGame).length > 0) {
-                    thisGame.playersInFocus = whosAlive(thisGame);
-                    thisGame = handleNightMadness(thisGame, message);
-                  }
-                } else {
-                  // The hunt begins!
-                  thisGame.playersInFocus = whosAlive(thisGame);
-                  thisGame = handleForage(thisGame, message);
                 }
                 break;
               case '!craft':
@@ -614,6 +622,7 @@ function setupGame () {
     isNight: false,
     nightCardInFocus: null,
     waitingForNight: null,
+    readyMessage: null,
     pile: {
       gear: [],
       craftSupplies: {
@@ -639,6 +648,27 @@ function createForage () {
     }
   }
   return realForage;
+}
+
+function handleReady (thisGame, message) {
+  if (thisGame.waiting) {
+    message.channel.send(tr.inProgress);
+  } else if (thisGame.haveForaged) {
+    // Night is starting
+    thisGame.playersInFocus = whosAlive(thisGame);
+    thisGame.isNight = true;
+    message.channel.send(tr.nightStart);
+    thisGame = handleNight(thisGame, message);
+    if (!thisGame.waiting && whosAlive(thisGame).length > 0) {
+      thisGame.playersInFocus = whosAlive(thisGame);
+      thisGame = handleNightMadness(thisGame, message);
+    }
+  } else {
+    // The hunt begins!
+    thisGame.playersInFocus = whosAlive(thisGame);
+    thisGame = handleForage(thisGame, message);
+  }
+  return thisGame;
 }
 
 function printGame (thisGame) {
@@ -899,7 +929,9 @@ function handleNight (thisGame, message, choice) {
           }
           break;
         default:
-          console.log('Effect ' + nightCard.effect[effectNum] + ' not handled, skipping ...');
+          if (nightCard.effect[effectNum] !== 'NO FIRE') {
+            console.log('Effect ' + nightCard.effect[effectNum] + ' not handled, skipping ...');
+          }
       }
     }
 
@@ -1006,7 +1038,10 @@ function handleNightMadness (thisGame, message, choice) {
       }
       message.channel.send(tr.gameOverGood + '\n\n' + tr.retry);
     } else {
-      message.channel.send('Good morning! ' + printDayStart(thisGame));
+      message.channel.send('Good morning! ' + printDayStart(thisGame) + tr.rUReady + tr.tF + tr.react).then(function (startMessage) {
+        thisGame.readyMessage = startMessage.id;
+        startMessage.react('✅');
+      });
     }
   }
   return thisGame;
@@ -1100,7 +1135,7 @@ function handleForage (thisGame, message, choice) {
       player.currentForage += alter;
     }
   }
-  message.channel.send('The hunt is over!');
+
   for (var playerToCheck in thisGame.players) {
     if (thisGame.players[playerToCheck].hearts <= 0 && thisGame.players[playerToCheck].isAlive) {
       thisGame.players[playerToCheck].isAlive = false;
@@ -1117,6 +1152,11 @@ function handleForage (thisGame, message, choice) {
   if (whosAlive(thisGame).length === 0) {
     // Game over!
     message.channel.send(tr.gameOverBad + '\n\n' + tr.retry);
+  } else {
+    message.channel.send('The hunt is over! ' + tr.rUReady + tr.fTN + tr.react).then(function (huntMessage) {
+      thisGame.readyMessage = huntMessage.id;
+      huntMessage.react('✅');
+    });
   }
 
   thisGame.haveForaged = true;
