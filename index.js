@@ -76,7 +76,6 @@ bot.on('message', function (message) {
                   playerToGive.gear.push(thisGame.wreckage.pop());
                 }
                 thisGame.state = 'ingame';
-                // console.log(thisGame);
                 message.channel.send(tr.realStart).then(function (message) {
                   message.channel.send(printDayStart(thisGame) + tr.needHelp + '. ' + tr.rUReady + tr.tF + tr.react).then(function (startMessage) {
                     thisGame.readyMessage = startMessage.id;
