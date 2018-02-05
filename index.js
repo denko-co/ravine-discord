@@ -30,8 +30,13 @@ bot.on('messageReactionAdd', function (messageReaction) {
         return val;
       }, 0);
       if (peopleAlive === peopleReady) {
-        thisGame.readyMessage = null;
-        thisGame = handleReady(thisGame, message);
+        message.channel.fetchMessage(thisGame.readyMessage).then(function (readyMessage) {
+          if (readyMessage.pinned) {
+            readyMessage.unpin();
+          }
+          thisGame.readyMessage = null;
+          thisGame = handleReady(thisGame, message);
+        });
       }
     }
   }
@@ -81,6 +86,7 @@ bot.on('message', function (message) {
                   message.channel.send(printDayStart(thisGame) + tr.needHelp + '. ' + tr.rUReady + tr.tF + tr.react).then(function (startMessage) {
                     thisGame.readyMessage = startMessage.id;
                     startMessage.react('✅');
+                    startMessage.pin();
                   });
                 });
               }
@@ -1041,6 +1047,7 @@ function handleNightMadness (thisGame, message, choice) {
       message.channel.send('Good morning! ' + printDayStart(thisGame) + tr.rUReady + tr.tF + tr.react).then(function (startMessage) {
         thisGame.readyMessage = startMessage.id;
         startMessage.react('✅');
+        startMessage.pin();
       });
     }
   }
@@ -1156,6 +1163,7 @@ function handleForage (thisGame, message, choice) {
     message.channel.send('The hunt is over! ' + tr.rUReady + tr.fTN + tr.react).then(function (huntMessage) {
       thisGame.readyMessage = huntMessage.id;
       huntMessage.react('✅');
+      huntMessage.pin();
     });
   }
 
