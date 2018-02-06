@@ -104,7 +104,7 @@ bot.on('message', function (message) {
                     maxHearts: 6,
                     currentForage: 0,
                     craftSupplies: {
-                      WOOD: 1,
+                      WOOD: 0,
                       STONE: 0,
                       FIBER: 0
                     },
@@ -177,6 +177,9 @@ bot.on('message', function (message) {
                   message.channel.send(tr.inProgress);
                 } if (command[1]) {
                   var craftItemId = parseInt(command[1]);
+                  if (!craftItemId) {
+                    craftItemId = findItemIndexByName(thisGame.craft, command[1]) + 1;
+                  }
                   if (craftItemId && thisGame.craft[craftItemId - 1]) {
                     var craftItem = thisGame.craft[craftItemId - 1];
                     var canCraft = checkAndSetCraft(player.craftSupplies, craftItem.recipe);
@@ -212,6 +215,10 @@ bot.on('message', function (message) {
                 } else {
                   if (command[1]) {
                     var pileItem = parseInt(command[1]);
+                    command[1] = command[1].toUpperCase();
+                    if (!pileItem) {
+                      pileItem = findItemIndexByName(player.gear, command[1]) + 1;
+                    }
                     if (pileItem && thisGame.pile.gear[pileItem - 1]) {
                       player.gear.push(thisGame.pile.gear[pileItem - 1]);
                       thisGame.pile.gear.splice(pileItem - 1, 1);
@@ -261,10 +268,14 @@ bot.on('message', function (message) {
                       message.channel.send(tr.badGive);
                       return;
                     }
-                    var item = parseInt(command[1]);
-                    if (item && player.gear[item - 1]) {
-                      thisGame.players[persons].gear.push(player.gear[item - 1]);
-                      player.gear.splice(item - 1, 1);
+                    var itemId = parseInt(command[1]);
+                    command[1] = command[1].toUpperCase();
+                    if (!itemId) {
+                      itemId = findItemIndexByName(player.gear, command[1]) + 1;
+                    }
+                    if (itemId && player.gear[itemId - 1]) {
+                      thisGame.players[persons].gear.push(player.gear[itemId - 1]);
+                      player.gear.splice(itemId - 1, 1);
                       message.channel.send(tr.tC);
                     } else if (_.contains(['WOOD', 'STONE', 'FIBER'], command[1])) {
                       var numToGive;
@@ -303,6 +314,9 @@ bot.on('message', function (message) {
                     }
                     if (command[1]) {
                       var itemIdDanger = parseInt(command[1]);
+                      if (!itemIdDanger) {
+                        itemIdDanger = findItemIndexByName(player.gear, command[1]) + 1;
+                      }
                       if (itemIdDanger && player.gear[itemIdDanger - 1]) {
                         var itemDanger = player.gear[itemIdDanger - 1];
                         if (thisGame.isNight && !thisGame.players[thisGame.playersInFocus[0]].goingMad) {
@@ -378,6 +392,9 @@ bot.on('message', function (message) {
                 } else {
                   if (command[1]) {
                     var itemIdSafe = parseInt(command[1]);
+                    if (!itemIdSafe) {
+                      itemIdSafe = findItemIndexByName(player.gear, command[1]) + 1;
+                    }
                     if (itemIdSafe && player.gear[itemIdSafe - 1]) {
                       var itemSafe = player.gear[itemIdSafe - 1];
                       var isFoodSafe = itemSafe.hearts;
@@ -765,6 +782,12 @@ function blockedContains (blockList, block) {
     }
   }
   return null;
+}
+
+function findItemIndexByName (list, name) {
+  return _.findIndex(list, function (item) {
+    return new RegExp('\\b' + name.toUpperCase() + '\\b').test(item.name);
+  });
 }
 
 function handleNight (thisGame, message, choice) {
