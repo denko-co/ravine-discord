@@ -182,7 +182,7 @@ bot.on('message', function (message) {
                   if (craftItemId && thisGame.craft[craftItemId - 1]) {
                     var craftItem = thisGame.craft[craftItemId - 1];
                     var canCraft = checkAndSetCraft(player.craftSupplies, craftItem.recipe);
-                    if (canCraft) {
+                    if (!(typeof canCraft === 'string')) {
                       if (craftItem.name === 'FIRE') {
                         if (thisGame.fire) {
                           message.channel.send(tr.doubleFire);
@@ -199,7 +199,7 @@ bot.on('message', function (message) {
                       player.craftSupplies = canCraft;
                       message.channel.send(tr.cC);
                     } else {
-                      message.channel.send(tr.noMaterial);
+                      message.channel.send(tr.noMaterial + canCraft);
                     }
                   } else {
                     message.channel.send(tr.badCraft);
@@ -717,6 +717,8 @@ function printGame (thisGame) {
 }
 
 function checkAndSetCraft (mySupplies, recipeCost) {
+  var missingText = 'You\'re missing ';
+  var haveMissed = false;
   var leftOver = {
     WOOD: mySupplies.WOOD,
     STONE: mySupplies.STONE,
@@ -725,10 +727,18 @@ function checkAndSetCraft (mySupplies, recipeCost) {
   for (var supp in recipeCost) {
     leftOver[supp] = leftOver[supp] - recipeCost[supp];
     if (leftOver[supp] < 0) {
-      return false;
+      if (haveMissed) {
+        missingText += ', ';
+      }
+      missingText += (-1 * leftOver[supp]) + ' ' + supp;
+      haveMissed = true;
     }
   }
-  return leftOver;
+  if (haveMissed) {
+    return missingText + '.';
+  } else {
+    return leftOver;
+  }
 }
 
 function printCraftOptions (craftOptions) {

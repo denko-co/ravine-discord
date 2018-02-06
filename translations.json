@@ -64,7 +64,7 @@
   "paaf" : "Please allocate all food to use it.",
   "isCraft" : "To craft the stuff here, type `!craft <item number/name>`.",
   "badCraft" : "Something went wrong. Remember, to craft stuff, type `!craft <item number/name>`, or just `!craft` to get the list.",
-  "noMaterial" : "You don't have enough material to craft this. Maybe ask your friends?",
+  "noMaterial" : "You don't have enough material to craft this. Maybe ask your friends? ",
   "doubleFire" : "You don't need two fires.",
   "cantFire" : "No fire today. Sorry ;~;",
   "nightStart" : "The sun sets. What will it be tonight?",
