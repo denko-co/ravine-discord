@@ -268,7 +268,10 @@ bot.on('message', function (message) {
                       message.channel.send(tr.tC);
                     } else if (_.contains(['WOOD', 'STONE', 'FIBER'], command[1])) {
                       var numToGive = parseInt(command[3]);
-                      if (numToGive || numToGive === 0) {
+                      if (!numToGive) {
+                        numToGive = player.craftSupplies[command[1]];
+                      }
+                      if (numToGive === 0) {
                         if (numToGive <= 0) {
                           message.channel.send(tr.numberGive);
                         } else if (numToGive > player.craftSupplies[command[1]]) {
@@ -387,113 +390,97 @@ bot.on('message', function (message) {
                         }
                       }
                       if (isFoodSafe) {
-                        var peopleToFeed = command.length - 2;
-                        if (peopleToFeed === 0) {
-                          // Eat it all, yay!
-                          if (player.maxHearts === player.hearts) {
-                            message.channel.send(tr.dumbEat);
-                          } else {
-                            var valueToHeal = Math.min((player.maxHearts - player.hearts), isFoodSafe);
-                            player.hearts += valueToHeal;
-                            var msg2Send = tr.drawFood + ' <@' + message.author.id.toString() + '> ' + tr.h4 + valueToHeal + ' heart(s)';
-                            if (player.maxHearts === player.hearts) {
-                              msg2Send += tr.maxHP;
-                            } else {
-                              msg2Send += '.';
-                            }
-                            for (var singleMadness = player.madness.length - 1; singleMadness >= 0; singleMadness--) {
-                              var singleMadnessCard = player.madness[singleMadness];
-                              for (var singleMadnessRecov = 0; singleMadnessRecov < singleMadnessCard.recovery.length; singleMadnessRecov++) {
-                                if (singleMadnessCard.recovery[singleMadnessRecov] === 'GAIN 1') {
-                                  msg2Send += ' **' + singleMadnessCard.name + '** has been cured!';
-                                  player.madness.splice(singleMadness, 1);
-                                  break;
-                                }
-                              }
-                            }
-                            message.channel.send(msg2Send);
-                            player.gear.splice(itemIdSafe - 1, 1);
+                        var eatingPeople = [];
+                        var foodCount = 0;
+                        var hasMax = true;
+                        var modifier = command.length === 2 ? 1 : 0; // This is a hack to get it to enter the loop once
+                        for (var k = 2; k < command.length + modifier; k += 2) {
+                          var personCode;
+                          if (command[k]) {
+                            personCode = command[k].match(/^<@\d*>$/g);
                           }
-                        } else if (peopleToFeed % 2 === 1) {
-                          message.channel.send(tr.badEat);
-                        } else {
-                          var eatingPeople = [];
-                          var foodCount = 0;
-                          var hasMax = true;
-                          for (var k = 2; k < command.length; k += 2) {
-                            var personCode = command[k].match(/^<@\d*>$/g);
-                            var person;
-                            if (personCode) {
-                              person = personCode.toString().slice(2, -1);
+                          var person;
+                          if (personCode) {
+                            person = personCode.toString().slice(2, -1);
+                          } else {
+                            if (command.length === 2) {
+                              person = message.author.id.toString();
                             } else {
                               message.channel.send(tr.badEat);
                               return;
                             }
-                            if (thisGame.players[person]) {
-                              if (!thisGame.players[person].isAlive) {
-                                message.channel.send(tr.baddestEat);
-                                return;
-                              }
-                              var toEat = parseInt(command[k + 1]);
-                              if (toEat) {
-                                if (toEat > 0) {
-                                  // All good!
-                                  if (thisGame.players[person].hearts !== thisGame.players[person].maxHearts) {
-                                    hasMax = false;
-                                  }
-                                  foodCount += toEat;
-                                  eatingPeople.push({
-                                    person: person,
-                                    toEat: toEat
-                                  });
-                                } else {
-                                  message.channel.send(tr.numberEat);
-                                  return;
-                                }
-                              } else {
-                                message.channel.send(tr.badEat);
-                                return;
-                              }
-                            } else {
-                              message.channel.send(tr.badderEat);
+                          }
+                          if (thisGame.players[person]) {
+                            if (!thisGame.players[person].isAlive) {
+                              message.channel.send(tr.baddestEat);
                               return;
                             }
-                          }
-                          if (hasMax) {
-                            message.channel.send(tr.dumbEat);
-                          } else if (foodCount !== isFoodSafe) {
-                            if (foodCount > isFoodSafe) {
-                              message.channel.send(tr.baddingEat);
-                            } else {
-                              message.channel.send(tr.paaf);
-                            }
-                          } else {
-                            // Eat! Nom nom nom!
-                            var msg2SendGroup = '';
-                            for (var r = 0; r < eatingPeople.length; r++) {
-                              var eating = thisGame.players[eatingPeople[r].person];
-                              var valueToEat = Math.min((eating.maxHearts - eating.hearts), eatingPeople[r].toEat);
-                              eating.hearts += valueToEat;
-                              msg2SendGroup += '\n' + tr.drawFood + ' <@' + eatingPeople[r].person + '> ' + tr.h4 + valueToEat + ' heart(s)';
-                              if (eating.maxHearts === eating.hearts) {
-                                msg2SendGroup += tr.maxHP;
-                              } else {
-                                msg2SendGroup += '.';
-                              }
-                              for (var groupMadness = eating.madness.length - 1; groupMadness >= 0; groupMadness--) {
-                                var groupMadnessCard = eating.madness[groupMadness];
-                                for (var groupMadnessRecov = 0; groupMadnessRecov < groupMadnessCard.recovery.length; groupMadnessRecov++) {
-                                  if (groupMadnessCard.recovery[groupMadnessRecov] === 'GAIN 1') {
-                                    msg2SendGroup += ' **' + groupMadnessCard.name + '** has been cured!';
-                                    eating.madness.splice(groupMadness, 1);
-                                    break;
-                                  }
+                            var toEat = parseInt(command[k + 1]);
+                            if (!toEat) {
+                              if (k === command.length - 1 + modifier) {
+                                if (foodCount < isFoodSafe) {
+                                  toEat = isFoodSafe - foodCount;
                                 }
                               }
                             }
-                            message.channel.send(msg2SendGroup);
-                            player.gear.splice(itemIdSafe - 1, 1);
+                            if (toEat) {
+                              if (toEat > 0) {
+                                // All good!
+                                if (thisGame.players[person].hearts !== thisGame.players[person].maxHearts) {
+                                  hasMax = false;
+                                }
+                                foodCount += toEat;
+                                eatingPeople.push({
+                                  person: person,
+                                  toEat: toEat
+                                });
+                              } else {
+                                message.channel.send(tr.numberEat);
+                                return;
+                              }
+                            } else {
+                              message.channel.send(tr.badEat);
+                              return;
+                            }
+                          } else {
+                            message.channel.send(tr.badderEat);
+                            return;
                           }
+                        }
+                        if (hasMax) {
+                          message.channel.send(tr.dumbEat);
+                        } else if (foodCount !== isFoodSafe) {
+                          if (foodCount > isFoodSafe) {
+                            message.channel.send(tr.baddingEat);
+                          } else {
+                            message.channel.send(tr.paaf);
+                          }
+                        } else {
+                          // Eat! Nom nom nom!
+                          var msg2SendGroup = '';
+                          for (var r = 0; r < eatingPeople.length; r++) {
+                            var eating = thisGame.players[eatingPeople[r].person];
+                            var valueToEat = Math.min((eating.maxHearts - eating.hearts), eatingPeople[r].toEat);
+                            eating.hearts += valueToEat;
+                            msg2SendGroup += '\n' + tr.drawFood + ' <@' + eatingPeople[r].person + '> ' + tr.h4 + valueToEat + ' heart(s)';
+                            if (eating.maxHearts === eating.hearts) {
+                              msg2SendGroup += tr.maxHP;
+                            } else {
+                              msg2SendGroup += '.';
+                            }
+                            for (var groupMadness = eating.madness.length - 1; groupMadness >= 0; groupMadness--) {
+                              var groupMadnessCard = eating.madness[groupMadness];
+                              for (var groupMadnessRecov = 0; groupMadnessRecov < groupMadnessCard.recovery.length; groupMadnessRecov++) {
+                                if (groupMadnessCard.recovery[groupMadnessRecov] === 'GAIN 1') {
+                                  msg2SendGroup += ' **' + groupMadnessCard.name + '** has been cured!';
+                                  eating.madness.splice(groupMadness, 1);
+                                  break;
+                                }
+                              }
+                            }
+                          }
+                          message.channel.send(msg2SendGroup);
+                          player.gear.splice(itemIdSafe - 1, 1);
                         }
                       } else if (isProtectSafe) {
                         message.channel.send(tr.cantProtect);

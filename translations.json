@@ -41,7 +41,7 @@
   "blind" : "Blind rage! Draw one less forage card!",
   "noHeal" : "you can't gain hearts above your maximum ",
   "dumbEat" : "All the people eating have max hearts. Maybe you want to reconsider?",
-  "badEat" : "Something went wrong. Remember, to use food, type `!use <item number> <playerMention> <num> <playerMention> <num> ...` or `!use <item number>` to eat it all.",
+  "badEat" : "Something went wrong. Remember, to use food, type `!use <item number> <playerMention> <num> <playerMention> <num> ...` or `!use <item number>` to eat it all. If you're trying to give someone 'the rest', make sure they're at the end.",
   "badGive" : "Something went wrong. Remember, to give items, type `!give <item number> <playerMention>`, or `!give <craft item> <playerMention> <number>` for craft stuff.",
   "badTake" : "Something went wrong. Remember, to take from the pile, type `!pile <item number>` for gear, or `!pile <craft item> <number>` for craft supplies.",
   "badderEat" : "You can't feed someone who isn't playing.",
