@@ -480,7 +480,8 @@ bot.on('message', function (message) {
                             var eating = thisGame.players[eatingPeople[r].person];
                             var valueToEat = Math.min((eating.maxHearts - eating.hearts), eatingPeople[r].toEat);
                             eating.hearts += valueToEat;
-                            msg2SendGroup += '\n' + tr.drawFood + ' <@' + eatingPeople[r].person + '> ' + tr.h4 + valueToEat + ' heart(s)';
+                            var slashs = valueToEat === 1 ? '' : 's';
+                            msg2SendGroup += '\n' + tr.drawFood + ' <@' + eatingPeople[r].person + '> ' + tr.h4 + valueToEat + ' heart' + slashs;
                             if (eating.maxHearts === eating.hearts) {
                               msg2SendGroup += tr.maxHP;
                             } else {
@@ -751,7 +752,8 @@ function printPlayer (player, usernaem) {
   } else {
     for (var i = 0; i < player.gear.length; i++) {
       if (player.gear[i].hearts) {
-        message += '\n**' + (i + 1) + '.** *' + player.gear[i].name + ' - Restore ' + player.gear[i].hearts + ' heart(s)*';
+        var slashs = player.gear[i].hearts === 1 ? '' : 's';
+        message += '\n**' + (i + 1) + '.** *' + player.gear[i].name + ' - Restore ' + player.gear[i].hearts + ' heart' + slashs + '*';
       } else {
         message += '\n**' + (i + 1) + '.** *' + player.gear[i].name + ' - ' + player.gear[i].effectDescription + '*';
       }
@@ -786,7 +788,8 @@ function printPile (pile) {
   } else {
     for (var i = 0; i < pile.gear.length; i++) {
       if (pile.gear[i].hearts) {
-        message += '\n**' + (i + 1) + '.** *' + pile.gear[i].name + ' - Restore ' + pile.gear[i].hearts + ' heart(s)*';
+        var slashs = pile.gear[i].hearts === 1 ? '' : 's';
+        message += '\n**' + (i + 1) + '.** *' + pile.gear[i].name + ' - Restore ' + pile.gear[i].hearts + ' heart' + slashs + '*';
       } else {
         message += '\n**' + (i + 1) + '.** *' + pile.gear[i].name + ' - ' + pile.gear[i].effectDescription + '*';
       }
@@ -1207,7 +1210,8 @@ function handleForage (thisGame, message, choice) {
 function printForage (card) {
   var cardText = card.description + ' **' + card.name + '**';
   if (card.hearts) {
-    cardText += ' *(restores ' + card.hearts + ' heart(s))*';
+    var slashs = card.hearts === 1 ? '' : 's';
+    cardText += ' *(restores ' + card.hearts + ' heart' + slashs + '*';
   }
   return cardText;
 }

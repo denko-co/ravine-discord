@@ -9,7 +9,7 @@
      }, {
        "name" : "BOTTLE OF VODKA",
        "effect" : ["GAIN 3 SPLIT"],
-       "effectDescription" : "Restores 3 heart(s).",
+       "effectDescription" : "Restores 3 hearts.",
        "uses" : 1,
        "nonForage" : true
      }, {
