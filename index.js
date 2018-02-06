@@ -744,12 +744,14 @@ function printCraftOptions (craftOptions) {
 }
 
 function printPlayer (player, usernaem, subset) {
+  var separator = '\n\n';
   if (subset) {
     subset = subset.toUpperCase();
+    separator = '\n'; // Could change this for one line output
   }
-  var message = '<@' + usernaem + '>:\n';
+  var message = '<@' + usernaem + '>:';
   if (!subset || _.contains(['GEAR'], subset)) {
-    message += '__Gear: __ ';
+    message += '\n\n__Gear:__ ';
     if (player.gear.length === 0) {
       message += ' No gear!';
     } else {
@@ -768,11 +770,11 @@ function printPlayer (player, usernaem, subset) {
     if (player.hearts <= 0) {
       extraText = ' - once this resolves, you will probably die.';
     }
-    message += '\n\n__Hearts: __' + player.hearts + extraText;
+    message += separator + '__Hearts:__ ' + player.hearts + extraText;
   }
 
   if (!subset || _.contains(['MAD', 'MADNESS'], subset)) {
-    message += '\n\n__Madness: __';
+    message += separator + '__Madness:__ ';
     if (player.goingMad) {
       message += 'You\'re currently going mad (see above)';
     }
@@ -786,7 +788,7 @@ function printPlayer (player, usernaem, subset) {
   }
 
   if (!subset || _.contains(['CRAFT'], subset)) {
-    message += '\n\n__Craft: __\nWOOD: ' + player.craftSupplies.WOOD + '\nSTONE: ' + player.craftSupplies.STONE + '\nFIBER: ' + player.craftSupplies.FIBER;
+    message += '\n\n__Craft:__ \nWOOD: ' + player.craftSupplies.WOOD + '\nSTONE: ' + player.craftSupplies.STONE + '\nFIBER: ' + player.craftSupplies.FIBER;
   }
 
   console.log(player);
@@ -1224,7 +1226,9 @@ function printForage (card) {
   var cardText = card.description + ' **' + card.name + '**';
   if (card.hearts) {
     var slashs = card.hearts === 1 ? '' : 's';
-    cardText += ' *(restores ' + card.hearts + ' heart' + slashs + '*';
+    cardText += ' *(restores ' + card.hearts + ' heart' + slashs + ')*';
+  } else if (_.contains(['WOOD', 'STONE', 'FIBER'], card.name)) {
+    cardText += ' *(crafting material)*';
   }
   return cardText;
 }
