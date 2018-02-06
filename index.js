@@ -147,7 +147,7 @@ bot.on('message', function (message) {
                 message.channel.send(printGame(thisGame));
                 break;
               case '!me':
-                message.channel.send(printPlayer(player, message.author.id.toString()));
+                message.channel.send(printPlayer(player, message.author.id.toString(), command[1]));
                 break;
               case '!ready':
                 player.isReady = !player.isReady;
@@ -743,39 +743,52 @@ function printCraftOptions (craftOptions) {
   return msg;
 }
 
-function printPlayer (player, usernaem) {
+function printPlayer (player, usernaem, subset) {
+  if (subset) {
+    subset = subset.toUpperCase();
+  }
   var message = '<@' + usernaem + '>:\n';
-  message += '__Gear: __ ';
-
-  if (player.gear.length === 0) {
-    message += ' No gear!';
-  } else {
-    for (var i = 0; i < player.gear.length; i++) {
-      if (player.gear[i].hearts) {
-        var slashs = player.gear[i].hearts === 1 ? '' : 's';
-        message += '\n**' + (i + 1) + '.** *' + player.gear[i].name + ' - Restore ' + player.gear[i].hearts + ' heart' + slashs + '*';
-      } else {
-        message += '\n**' + (i + 1) + '.** *' + player.gear[i].name + ' - ' + player.gear[i].effectDescription + '*';
+  if (!subset || _.contains(['GEAR'], subset)) {
+    message += '__Gear: __ ';
+    if (player.gear.length === 0) {
+      message += ' No gear!';
+    } else {
+      for (var i = 0; i < player.gear.length; i++) {
+        if (player.gear[i].hearts) {
+          var slashs = player.gear[i].hearts === 1 ? '' : 's';
+          message += '\n**' + (i + 1) + '.** *' + player.gear[i].name + ' - Restore ' + player.gear[i].hearts + ' heart' + slashs + '*';
+        } else {
+          message += '\n**' + (i + 1) + '.** *' + player.gear[i].name + ' - ' + player.gear[i].effectDescription + '*';
+        }
       }
     }
   }
-  var extraText = '';
-  if (player.hearts <= 0) {
-    extraText = ' - once this resolves, you will probably die.';
+  if (!subset || _.contains(['HP', 'HEARTS'], subset)) {
+    var extraText = '';
+    if (player.hearts <= 0) {
+      extraText = ' - once this resolves, you will probably die.';
+    }
+    message += '\n\n__Hearts: __' + player.hearts + extraText;
   }
-  message += '\n\n__Hearts: __' + player.hearts + extraText + '\n\n__Madness: __';
-  if (player.goingMad) {
-    message += 'You\'re currently going mad (see above)';
-  }
-  if (player.madness.length === 0 && !player.goingMad) {
-    message += 'You\'re sane! (at least, in game)';
-  } else {
-    for (var j = 0; j < player.madness.length; j++) {
-      message += '\n' + printMadness(player.madness[j]);
+
+  if (!subset || _.contains(['MAD', 'MADNESS'], subset)) {
+    message += '\n\n__Madness: __';
+    if (player.goingMad) {
+      message += 'You\'re currently going mad (see above)';
+    }
+    if (player.madness.length === 0 && !player.goingMad) {
+      message += 'You\'re sane! (at least, in game)';
+    } else {
+      for (var j = 0; j < player.madness.length; j++) {
+        message += '\n' + printMadness(player.madness[j]);
+      }
     }
   }
 
-  message += '\n\n__Craft: __\nWOOD: ' + player.craftSupplies.WOOD + '\nSTONE: ' + player.craftSupplies.STONE + '\nFIBER: ' + player.craftSupplies.FIBER;
+  if (!subset || _.contains(['CRAFT'], subset)) {
+    message += '\n\n__Craft: __\nWOOD: ' + player.craftSupplies.WOOD + '\nSTONE: ' + player.craftSupplies.STONE + '\nFIBER: ' + player.craftSupplies.FIBER;
+  }
+
   console.log(player);
   return message;
 }
