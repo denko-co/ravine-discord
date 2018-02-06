@@ -13,34 +13,28 @@ bot.on('ready', function (event) {
   console.log('Logged in as %s - %s\n', bot.user.username, bot.user.id);
 });
 
-bot.on('messageReactionAdd', function (messageReaction) {
+bot.on('messageReactionAdd', function (messageReaction, user) {
+  handleReaction(messageReaction, user, true);
+});
+
+bot.on('messageReactionRemove', function (messageReaction, user) {
+  handleReaction(messageReaction, user, false);
+});
+
+function handleReaction (messageReaction, user, ready) {
   var message = messageReaction.message;
   var channelID = message.channel.id.toString();
   if (channelID in listeningTo) {
     var thisGame = listeningTo[channelID];
-    var peopleAlive = whosAlive(thisGame).length;
-    if (message.id === thisGame.readyMessage && whosAlive(thisGame).length !== 0) {
-      var peopleReady = message.reactions.reduce(function (val, curr) { // This could probably use a reaction collector
-        if (curr.emoji.name === '✅') {
-          val += curr.users.filter(function (user) {
-            var player = thisGame.players[user.id];
-            return player && player.isAlive;
-          }).array().length;
-        }
-        return val;
-      }, 0);
-      if (peopleAlive === peopleReady) {
-        message.channel.fetchMessage(thisGame.readyMessage).then(function (readyMessage) {
-          if (readyMessage.pinned) {
-            readyMessage.unpin();
-          }
-          thisGame.readyMessage = null;
-          thisGame = handleReady(thisGame, message);
-        });
+    if (messageReaction.emoji.name === '✅') {
+      var player = thisGame.players[user.id.toString()];
+      if (player) {
+        player.isReady = ready;
       }
     }
+    thisGame = checkAndDoReady(thisGame, message);
   }
-});
+}
 
 bot.on('message', function (message) {
   if (!message.author.bot && message.content) {
@@ -50,7 +44,7 @@ bot.on('message', function (message) {
       var command = message.content.match(/\S+/g) || [];
       var thisGame = listeningTo[channelID];
       var player = thisGame.players[message.author.id.toString()];
-      var commands = [' !help', ' !status', ' !me', ' !forage', ' !craft', ' !give', ' !use', ' !pass', ' !pile'];
+      var commands = [' !help', ' !status', ' !me', ' !ready', ' !forage', ' !craft', ' !give', ' !use', ' !pass', ' !pile'];
       if (message.content === '!help') {
         // Send the player some instructions, regardless of current game state
         message.channel.send((thisGame.state === 'joining' || whosAlive(thisGame).length === 0) ? message.channel.send(tr.startHelp) : 'Available commands are:' + commands + tr.helpText);
@@ -112,7 +106,8 @@ bot.on('message', function (message) {
                     goingMad: false,
                     targeting: null,
                     targeted: false,
-                    isAlive: true
+                    isAlive: true,
+                    isReady: false
                   };
 
                   message.channel.send(tr.welcome);
@@ -153,6 +148,11 @@ bot.on('message', function (message) {
                 break;
               case '!me':
                 message.channel.send(printPlayer(player, message.author.id.toString()));
+                break;
+              case '!ready':
+                player.isReady = !player.isReady;
+                message.channel.send(player.isReady ? tr.urReady : tr.urNotReady);
+                thisGame = checkAndDoReady(thisGame, message);
                 break;
               case '!forage':
                 if (thisGame.waiting) {
@@ -562,6 +562,11 @@ bot.on('message', function (message) {
                     if (whosAlive(thisGame).length === 0) {
                       // Game over!
                       message.channel.send(tr.gameOverBad + '\n\n' + tr.retry);
+                    } else {
+                      for (var readyPlayer in thisGame.players) {
+                        thisGame.players[readyPlayer].isReady = false;
+                      }
+                      message.channel.send(tr.dedReady);
                     }
                   }
                   return;
@@ -658,6 +663,24 @@ function createForage () {
     }
   }
   return realForage;
+}
+
+function checkAndDoReady (thisGame, message) {
+  if (_.every(thisGame.players, function (readyPlayer) {
+    return (readyPlayer.isReady || !(readyPlayer.isAlive));
+  })) {
+    for (var readyPlayer in thisGame.players) {
+      thisGame.players[readyPlayer].isReady = false;
+    }
+    message.channel.fetchMessage(thisGame.readyMessage).then(function (readyMessage) {
+      if (readyMessage.pinned) {
+        readyMessage.unpin();
+      }
+      thisGame.readyMessage = null;
+      thisGame = handleReady(thisGame, message);
+    });
+    return thisGame;
+  }
 }
 
 function handleReady (thisGame, message) {
