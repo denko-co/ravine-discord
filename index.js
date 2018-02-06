@@ -104,7 +104,7 @@ bot.on('message', function (message) {
                     maxHearts: 6,
                     currentForage: 0,
                     craftSupplies: {
-                      WOOD: 0,
+                      WOOD: 1,
                       STONE: 0,
                       FIBER: 0
                     },
@@ -267,11 +267,13 @@ bot.on('message', function (message) {
                       player.gear.splice(item - 1, 1);
                       message.channel.send(tr.tC);
                     } else if (_.contains(['WOOD', 'STONE', 'FIBER'], command[1])) {
-                      var numToGive = parseInt(command[3]);
-                      if (!numToGive) {
+                      var numToGive;
+                      if (!command[3]) {
                         numToGive = player.craftSupplies[command[1]];
+                      } else {
+                        numToGive = parseInt(command[3]);
                       }
-                      if (numToGive === 0) {
+                      if (numToGive || numToGive === 0) {
                         if (numToGive <= 0) {
                           message.channel.send(tr.numberGive);
                         } else if (numToGive > player.craftSupplies[command[1]]) {
