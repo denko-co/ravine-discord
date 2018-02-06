@@ -51,16 +51,15 @@ bot.on('message', function (message) {
       var thisGame = listeningTo[channelID];
       var player = thisGame.players[message.author.id.toString()];
       var commands = [' !help', ' !status', ' !me', ' !forage', ' !craft', ' !give', ' !use', ' !pass', ' !pile'];
-      if (whosAlive(thisGame).length === 0 && thisGame.state !== 'joining') {
+      if (message.content === '!help') {
+        // Send the player some instructions, regardless of current game state
+        message.channel.send((thisGame.state === 'joining' || whosAlive(thisGame).length === 0) ? message.channel.send(tr.startHelp) : 'Available commands are:' + commands + tr.helpText);
+      } else if (whosAlive(thisGame).length === 0 && thisGame.state !== 'joining') {
         // Game is over, we are waiting for a retry
         if (message.content === '!retry') {
           listeningTo[channelID] = setupGame();
           message.channel.send(tr.introduce);
         }
-      }
-      if (message.content === '!help') {
-        // Send the player some instructions, regardless of current game state
-        message.channel.send((thisGame.state === 'joining') ? message.channel.send(tr.startHelp) : 'Available commands are:' + commands + tr.helpText);
       } else {
         if (!player && thisGame.state !== 'joining') {
           return; // If we're in game, ignore messages that aren't players
