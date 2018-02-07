@@ -62,7 +62,7 @@ bot.on('message', function (message) {
           case 'joining':
             if (thisGame.waiting && player) {
               var num = parseInt(message.content);
-              if (num && num > 0 && num < thisGame.difficulty.length) {
+              if (num && num > 0 && num <= thisGame.difficulty.length) {
                 var rounds = parseInt(thisGame.difficulty[num - 1].split(' ')[1]);
                 thisGame.rounds = rounds;
                 thisGame.maxRounds = rounds;
@@ -216,7 +216,7 @@ bot.on('message', function (message) {
                     var pileItem = parseInt(command[1]);
                     command[1] = command[1].toUpperCase();
                     if (!pileItem) {
-                      pileItem = findItemIndexByName(player.gear, command[1]) + 1;
+                      pileItem = findItemIndexByName(thisGame.pile.gear, command[1]) + 1;
                     }
                     if (pileItem && thisGame.pile.gear[pileItem - 1]) {
                       player.gear.push(thisGame.pile.gear[pileItem - 1]);
@@ -763,7 +763,7 @@ function printPlayer (player, usernaem, subset) {
   if (!subset || _.contains(['GEAR'], subset)) {
     message += '\n\n__Gear:__ ';
     if (player.gear.length === 0) {
-      message += ' No gear!';
+      message += 'No gear!';
     } else {
       for (var i = 0; i < player.gear.length; i++) {
         if (player.gear[i].hearts) {
