@@ -12,8 +12,6 @@
   "realStart" : "Thank you for flying Treetop Airlines. We know you have a choice in airlines, and it looks like you made the wrong one.",
   "dayStart" : "A new day begins!",
   "needHelp" : "Remember, if you're stuck (or just need a refresher), type `!help`",
-  "urReady" : "Ready to rock!",
-  "urNotReady" : "Maybe later then!",
   "dedReady" : "Everyone has been unreadied out of respect for the dead.",
   "mustForage" : "To forage, please specify a number of hearts to trade (0 - 3)",
   "cantForage" : "Sorry, foraging is done for today. Try again tomorrow!",

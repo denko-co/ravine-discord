@@ -26,7 +26,7 @@ function handleReaction (messageReaction, user, ready) {
   var channelID = message.channel.id.toString();
   if (channelID in listeningTo) {
     var thisGame = listeningTo[channelID];
-    if (messageReaction.emoji.name === '✅') {
+    if (thisGame.readyMessage === message.id && messageReaction.emoji.name === '✅') {
       var player = thisGame.players[user.id.toString()];
       if (player) {
         player.isReady = ready;
@@ -151,7 +151,7 @@ bot.on('message', function (message) {
                 break;
               case '!ready':
                 player.isReady = !player.isReady;
-                message.channel.send(player.isReady ? tr.urReady : tr.urNotReady);
+                message.react(player.isReady ? '🙆' : '🙅');
                 thisGame = checkAndDoReady(thisGame, message);
                 break;
               case '!forage':
